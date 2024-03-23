@@ -6,6 +6,6 @@
 #define	X_RESOLUTION 320
 #define	Y_RESOLUTION 244
 
-static Uint16	palette[1024] = { 0 };
+static Uint16	palette[257] = { 0 };
 
 #endif

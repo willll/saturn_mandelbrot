@@ -52,12 +52,16 @@ void mandelbrot() {
         return;
       }
 
+      if(done) {
+        return;
+      }
+
       int iteration = isInMandelbrot(real, imag, maxIterations);
 
       // Use the iteration count to index into the palette
       //RGBColor color = palette[iteration % 256];
 
-      slBMPset( x-(X_RESOLUTION>>1), y-(Y_RESOLUTION>>1), palette[iteration % 1024] );
+      slBMPset( x-(X_RESOLUTION>>1), y-(Y_RESOLUTION>>1), palette[iteration % 256] );
 
       // Convert to grayscale for simplicity
       //unsigned char gray = (unsigned char)(0.3 * color.r + 0.59 * color.g + 0.11 * color.b);
@@ -67,6 +71,8 @@ void mandelbrot() {
     }
     x= 0;
   }
+
+  done=0;
 }
 
 #endif
