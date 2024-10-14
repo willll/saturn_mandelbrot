@@ -60,10 +60,9 @@ int main(void)
   slPlaneNbg1(PL_SIZE_1x1);
 
   slMapNbg1(	(void *)NBG1_MAP_ADR,
-  (void *)NBG1_MAP_ADR,
-  (void *)NBG1_MAP_ADR,
-  (void *)NBG1_MAP_ADR
-);
+              (void *)NBG1_MAP_ADR,
+              (void *)NBG1_MAP_ADR,
+              (void *)NBG1_MAP_ADR );
 
 if ( slInitBitMap( bmNBG1, BM_512x256, ( void * )NBG1_MAP_ADR ) == FALSE ) {
   slPrint( "FALSE", slLocate( 10, 3 ) );

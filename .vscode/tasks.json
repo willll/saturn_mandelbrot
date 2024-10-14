@@ -1,0 +1,68 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile [RELEASE]",
+            "type": "shell",
+            "command": "ssh root@127.0.0.1 -p 2222 \"mkdir -p /saturn/build && \
+                        cd /saturn/build && rm -rf * && \
+                        cmake -DCMAKE_TOOLCHAIN_FILE=\\$SATURN_CMAKE/sega_saturn.cmake -DCMAKE_INSTALL_PREFIX=/saturn/ .. && \
+                        make all && \
+                        make install && \
+                        chmod 777 -R /saturn/{build,mandelbrot}/\"",
+            "problemMatcher": [],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "ssh root@127.0.0.1 -p 2222 \"rm -rf /saturn/build/* && rm -rf /saturn/mandelbrot/*\"",
+            "problemMatcher": [],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run with Kronos",
+            "type": "shell",
+            "command": "kronos -a ${workspaceFolder}/mandelbrot/mandelbrot.cue",
+            "problemMatcher": [],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run with Mednafen",
+            "type": "shell",
+            "command": "mednafen ${workspaceFolder}/mandelbrot/mandelbrot.cue",
+            "problemMatcher": [],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ]
+}
