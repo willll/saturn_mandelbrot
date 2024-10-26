@@ -16,37 +16,61 @@ static Uint16 y = 0;
 static Uint16 x = 0;
 static Uint8 done = 0;
 
-// Function to check if a point is in the Mandelbrot set
-int isInMandelbrot(double real, double imag, int maxIterations) {
-  Sint16 iteration = 0;
-  double zReal = real;
-  double zImag = imag;
+static volatile Uint8 slavedone = 1;
+static Uint16 slaveCpt = 0;
 
-  while (iteration < maxIterations) {
-    double zRealTemp = zReal * zReal - zImag * zImag + real;
-    zImag = 2 * zReal * zImag + imag;
+
+typedef struct parameter_slow{
+  double real;
+  double imag;
+  Uint16 x;
+  Uint16 y;
+  int maxIterations;
+} parameter_slow;
+
+static volatile parameter_slow slave_param;
+
+
+// Function to check if a point is in the Mandelbrot set
+int isInMandelbrot(parameter_slow * param) {
+  Sint16 iteration = 0;
+  double zReal = param->real;
+  double zImag = param->imag;
+
+  while (iteration < param->maxIterations) {
+    double zRealTemp = zReal * zReal - zImag * zImag + param->real;
+    zImag = 2 * zReal * zImag + param->imag;
     zReal = zRealTemp;
 
     if (zReal * zReal + zImag * zImag > 4.0) {
       return iteration;
     }
 
-    iteration++;
+    ++iteration;
   }
 
-  return maxIterations;
+  return param->maxIterations;
 }
 
-void mandelbrot() {
+void SlaveTask(void * data)
+{
+  char tmp[6];
+  parameter_slow * param = (parameter_slow *)data;
+  int iteration = isInMandelbrot(param);
+  slBMPset( param->x-(X_RESOLUTION>>1), param->y-(Y_RESOLUTION>>1), palette[iteration % 256] );
+  sprintf(tmp, "%d", slaveCpt++);
+  slPrint( tmp, slLocate( 12, 3 ) );
+  slavedone = 1;
+}
 
+
+void mandelbrot() {
+slavedone = 1;
   Uint32 timemax = TIM_FRT_MCR_TO_CNT(100000);
   TIM_FRT_SET_16(0);
 
-
   for (; y < height; y++) {
     for (; x < width; x++) {
-      double real = minReal + x * (maxReal - minReal) / (width - 1);
-      double imag = minImag + y * (maxImag - minImag) / (height - 1);
 
       if(TIM_FRT_CNT_TO_MCR(TIM_FRT_GET_16()) > timemax) {
         return;
@@ -56,18 +80,23 @@ void mandelbrot() {
         return;
       }
 
-      int iteration = isInMandelbrot(real, imag, maxIterations);
-
-      // Use the iteration count to index into the palette
-      //RGBColor color = palette[iteration % 256];
-
-      slBMPset( x-(X_RESOLUTION>>1), y-(Y_RESOLUTION>>1), palette[iteration % 256] );
-
-      // Convert to grayscale for simplicity
-      //unsigned char gray = (unsigned char)(0.3 * color.r + 0.59 * color.g + 0.11 * color.b);
-
-      // Print an ASCII character representing the color
-      //printf("\033[48;2;%d;%d;%dm ", color.r, color.g, color.b);
+      if (slavedone) {
+        slavedone = 0;
+        slave_param.real = minReal + x * (maxReal - minReal) / (width - 1);
+        slave_param.imag = minImag + y * (maxImag - minImag) / (height - 1);
+        slave_param.x = x;
+        slave_param.y = y;
+        slave_param.maxIterations = maxIterations;
+        slSlaveFunc(SlaveTask, (void *)(&slave_param));
+        
+      } else {
+        parameter_slow param;
+        param.real = minReal + x * (maxReal - minReal) / (width - 1);
+        param.imag = minImag + y * (maxImag - minImag) / (height - 1);
+        param.maxIterations = maxIterations;
+        int iteration = isInMandelbrot(&param);
+        slBMPset( x-(X_RESOLUTION>>1), y-(Y_RESOLUTION>>1), palette[iteration % 256] );
+      }
     }
     x= 0;
   }

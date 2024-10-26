@@ -34,17 +34,15 @@ void setPalette() {
   palette[255] = C_RGB(255, 255, 255);
 }
 
-
+// 
+// Main
+//
 int main(void)
 {
-  Uint8 isSelected = 0;
-
   FIXED  posX, posY;
 
   posX = toFIXED( 0.0 );
   posY = toFIXED( 0.0 );
-
-  Uint16 cursorX, cursorY, selectedCursorX, selectedCursorY = 0;
 
   slInitSystem( TV_320x224, NULL, 1 ); // TV_704x480
 
@@ -81,64 +79,7 @@ slTVOn();
 
 while( 1 ) {
 
-  Uint16 pad = Smpc_Peripheral[ 0 ].data;
-
-  if ( !(pad & PER_DGT_KU) ) {
-    if(cursorY > -(Y_RESOLUTION>>1)) {
-      cursorY -= UNIT;
-    } else {
-      cursorY = -(Y_RESOLUTION>>1);
-    }
-    (void)snprintf(emu_printf_buffer, 256, "UP cursorY : %d\n", cursorY);
-    debug_print(emu_printf_buffer);
-  }
-  if ( !(pad & PER_DGT_KD) ) {
-    if(cursorY < (Y_RESOLUTION>>1)) {
-      cursorY += UNIT;
-    } else {
-      cursorY = (Y_RESOLUTION>>1);
-    }
-    (void)snprintf(emu_printf_buffer, 256, "DOWN cursorY : %d\n", cursorY);
-    debug_print(emu_printf_buffer);
-  }
-  if ( !(pad & PER_DGT_KL) ) {
-    if(cursorX > -(X_RESOLUTION>>1)) {
-      cursorX -= UNIT;
-    } else {
-      cursorX = -(X_RESOLUTION>>1);
-    }
-    (void)snprintf(emu_printf_buffer, 256, "LEFT cursorX : %d\n", cursorX);
-    debug_print(emu_printf_buffer);
-  }
-  if ( !(pad & PER_DGT_KR) ) {
-    if(cursorX < (X_RESOLUTION>>1)) {
-      cursorX += UNIT;
-    } else {
-      cursorX = (X_RESOLUTION>>1);
-    }
-    (void)snprintf(emu_printf_buffer, 256, "RIGHT cursorX : %d\n", cursorX);
-    debug_print(emu_printf_buffer);
-  }
-  if ( !(pad & PER_DGT_TA) && !isSelected ) {
-    selectedCursorX = cursorX;
-    selectedCursorY = cursorY;
-    isSelected = 1;
-    (void)snprintf(emu_printf_buffer, 256, "SELECTED\n");
-    debug_print(emu_printf_buffer);
-  }
-  if ( !(pad & PER_DGT_TB) ) {
-    isSelected = 0;
-    (void)snprintf(emu_printf_buffer, 256, "UNSELECTED\n");
-    debug_print(emu_printf_buffer);
-  }
-
   mandelbrot();
-
-  if(isSelected) {
-    slBMBox( selectedCursorX, selectedCursorY, cursorX, cursorY, 255 );
-  } else {
-    slBMCircle(cursorX, cursorY, 2 ,255 );
-  }
 
   slSynch();
 }
