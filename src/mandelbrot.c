@@ -79,7 +79,7 @@ slTVOn();
 
 while( 1 ) {
 
-  mandelbrot();
+  mandelbrot_slow();
 
   slSynch();
 }

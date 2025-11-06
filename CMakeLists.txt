@@ -37,11 +37,13 @@ add_compile_definitions(MODEL_S _SH)
 
 cmake_path(NORMAL_PATH CMAKE_SOURCE_DIR OUTPUT_VARIABLE PROJECT_ROOT_NORMALIZED)
 
+add_compile_options("$<$<COMPILE_LANGUAGE:ASM>:${as_flags}>")
+
 add_compile_options(
    "$<$<COMPILE_LANGUAGE:C>:${c_flags}>"
    "$<$<COMPILE_LANGUAGE:C>:-ffile-prefix-map=${PROJECT_ROOT_NORMALIZED}=.>"
-   "$<$<CONFIG:DEBUG>:-g>"
-   "$<$<CONFIG:RELEASE>:-Os>"
+   "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:DEBUG>>:-g>"
+   "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:RELEASE>>:-Os>"
 )
 
 add_executable( ${TARGET_NAME}.elf ${SOURCES} )
